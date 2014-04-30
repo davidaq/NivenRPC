@@ -15,7 +15,7 @@ public class ServiceMap {
 	}
 
 	public Object invoke(String serviceName, String methodName,
-			Object[] parameters) throws RPCException {
+			Object[] parameters) {
 		ServiceItem item = serviceMap.get(serviceName);
 		if (item == null)
 			throw new RPCException("Service not found on server");
@@ -32,7 +32,7 @@ class ServiceItem {
 		this.serviceHandler = serviceHandler;
 	}
 
-	Object invoke(String methodName, Object[] parameters) throws RPCException {
+	Object invoke(String methodName, Object[] parameters) {
 		Class<?> parameterTypes[] = new Class<?>[parameters.length];
 		for (int i = 0; i < parameterTypes.length; i++) {
 			parameterTypes[i] = parameters[i].getClass();

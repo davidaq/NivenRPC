@@ -7,6 +7,5 @@ public class NettyTcpServer implements IServer {
 
 	@Override
 	public void serve(int port, IRequestHandler handler) {
-
 	}
 }
