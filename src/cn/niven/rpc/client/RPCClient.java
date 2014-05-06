@@ -8,6 +8,7 @@ import javassist.CtClass;
 import javassist.CtMethod;
 import javassist.CtNewMethod;
 import javassist.NotFoundException;
+import cn.niven.rpc.Common;
 import cn.niven.rpc.types.RPCException;
 
 public class RPCClient {
@@ -46,8 +47,7 @@ public class RPCClient {
 						CtMethod proxyMethod = CtNewMethod.copy(method, proxy,
 								null);
 						String methodBody = "_niven_rpc_invoke(\""
-								+ method.getName() + "\", "
-								+ interfaceType.getCanonicalName() + ".class";
+								+ Common.methodFullName(oMethod) + "\"";
 						if (method.getParameterTypes().length >= 0) {
 							String params = "";
 							for (int i = 0; i < method.getParameterTypes().length; i++) {
@@ -86,25 +86,26 @@ public class RPCClient {
 		}
 	}
 
-	private static final Object primitiveTypes[] = new Object[] {
-			Integer.class, Integer.TYPE, "0", "intValue", Short.class,
-			Short.TYPE, "0", "shortValue", Long.class, Long.TYPE, "0",
-			"longValue", Float.class, Float.TYPE, "0", "floatValue",
-			Double.class, Double.TYPE, "0", "doubleValue", Boolean.class,
-			Boolean.TYPE, "false", "booleanValue", Character.class,
-			Character.TYPE, "0", "charValue", Byte.class, Byte.TYPE, "0",
-			"byteValue" };
+	public static String getPrimitiveClassName(Class<?> target) {
+		for (int i = 0; i < Common.primitiveTypes.length; i += 4) {
+			if (Common.primitiveTypes[i + 1].equals(target)) {
+				return ((Class<?>) Common.primitiveTypes[i]).getSimpleName()
+						+ ".TYPE";
+			}
+		}
+		return null;
+	}
 
 	public static String wrapObjectToPrimitiveCast(Class<?> target,
 			String content) {
 		if (target.isPrimitive()) {
-			for (int i = 0; i < primitiveTypes.length; i += 4) {
-				if (primitiveTypes[i + 1].equals(target)) {
-					String typeName = ((Class<?>) primitiveTypes[i])
+			for (int i = 0; i < Common.primitiveTypes.length; i += 4) {
+				if (Common.primitiveTypes[i + 1].equals(target)) {
+					String typeName = ((Class<?>) Common.primitiveTypes[i])
 							.getSimpleName();
-					return content + "==null?" + primitiveTypes[i + 2] + ":(("
-							+ typeName + ")" + content + ")."
-							+ primitiveTypes[i + 3] + "()";
+					return content + "==null?" + Common.primitiveTypes[i + 2]
+							+ ":((" + typeName + ")" + content + ")."
+							+ Common.primitiveTypes[i + 3] + "()";
 				}
 			}
 		}
@@ -114,9 +115,9 @@ public class RPCClient {
 	public static String wrapPrimitiveToObjectCast(Class<?> target,
 			String content) {
 		if (target.isPrimitive()) {
-			for (int i = 0; i < primitiveTypes.length; i += 4) {
-				if (primitiveTypes[i + 1].equals(target)) {
-					return ((Class<?>) primitiveTypes[i]).getName()
+			for (int i = 0; i < Common.primitiveTypes.length; i += 4) {
+				if (Common.primitiveTypes[i + 1].equals(target)) {
+					return ((Class<?>) Common.primitiveTypes[i]).getName()
 							+ ".valueOf(" + content + ")";
 				}
 			}

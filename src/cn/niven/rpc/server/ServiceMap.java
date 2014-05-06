@@ -1,8 +1,10 @@
 package cn.niven.rpc.server;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 
+import cn.niven.rpc.Common;
 import cn.niven.rpc.types.RPCException;
 
 public class ServiceMap {
@@ -25,20 +27,22 @@ public class ServiceMap {
 
 class ServiceItem {
 	private final Object serviceHandler;
-	private final Class<?> serviceInterface;
+	private static final HashMap<String, Method> methodMap = new HashMap<String, Method>();
 
 	ServiceItem(Class<?> serviceInterface, Object serviceHandler) {
-		this.serviceInterface = serviceInterface;
 		this.serviceHandler = serviceHandler;
+		for (Method method : serviceInterface.getDeclaredMethods()) {
+			if (Modifier.isPublic(method.getModifiers())) {
+				methodMap.put(Common.methodFullName(method), method);
+			}
+		}
 	}
 
 	Object invoke(String methodName, Object[] parameters) {
-		Class<?> parameterTypes[] = new Class<?>[parameters.length];
-		for (int i = 0; i < parameterTypes.length; i++) {
-			parameterTypes[i] = parameters[i].getClass();
-		}
 		try {
-			Method m = serviceInterface.getMethod(methodName, parameterTypes);
+			Method m = methodMap.get(methodName);
+			if (m == null)
+				throw new RPCException("No such method in service");
 			return m.invoke(serviceHandler, parameters);
 		} catch (Throwable e) {
 			if (null != e.getCause())

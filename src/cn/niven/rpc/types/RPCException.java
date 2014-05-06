@@ -16,7 +16,7 @@ public class RPCException extends RuntimeException {
 	}
 
 	public RPCException(String errorMessage, Throwable cause) {
-		super(errorMessage);
+		super(errorMessage, cause);
 		this.cause = cause;
 	}
 }

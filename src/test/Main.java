@@ -1,33 +1,41 @@
 package test;
 
-import java.io.IOException;
-
-import cn.niven.rpc.client.CachedSocket;
 import cn.niven.rpc.client.RPCClient;
-import cn.niven.rpc.client.SocketPool;
+import cn.niven.rpc.server.RPCServer;
 
-public class Main {
-	public static void main(String args[]) throws Exception, IOException {
-		TestInterface client = RPCClient.getClient(TestInterface.class,
-				"127.0.0.1:5097");
-		CachedSocket socket = SocketPool.getSocket("niven.cn:80");
-		socket.getOutputStream().write(
-				"GET / HTTP/1.1\r\n\r\n\r\n".getBytes("UTF-8"));
-		Thread.sleep(1000);
-		byte buff[] = new byte[1500];
-		socket.getInputStream().read(buff);
-		System.out.println(new String(buff, "UTF-8"));
-		socket.close();
-		Thread.sleep(1500);
-		socket = SocketPool.getSocket("niven.cn:80");
-		socket.getOutputStream().write(
-				"GET / HTTP/1.1\r\n\r\n\r\n".getBytes("UTF-8"));
-		Thread.sleep(1000);
-		buff = new byte[1500];
-		socket.getInputStream().read(buff);
-		System.out.println(new String(buff, "UTF-8"));
-		socket.close();
+public class Main implements TestInterface {
+	public static void main(String args[]) throws Exception {
+		new Thread(new Runnable() {
 
-		System.out.println(client.sum(2, 4));
+			@Override
+			public void run() {
+				RPCServer server = new RPCServer();
+				server.exportService(TestInterface.class, new Main());
+				server.serve(15301);
+			}
+
+		}).start();
+		final TestInterface test = RPCClient.getClient(TestInterface.class,
+				"127.0.0.1:15301");
+		for (int i = 0; i < 20; i++) {
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					for (int i = 0; i < 19; i++) {
+						System.out.println(test.sum(11 * i, 6));
+						try {
+							Thread.sleep((long) (Math.random() * 1000));
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}).start();
+		}
+	}
+
+	@Override
+	public int sum(int a, int b) {
+		return a + b;
 	}
 }

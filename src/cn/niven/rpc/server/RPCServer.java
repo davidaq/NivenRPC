@@ -1,5 +1,6 @@
 package cn.niven.rpc.server;
 
+import cn.niven.rpc.Composition;
 import cn.niven.rpc.server.abstraction.IRequestHandler;
 import cn.niven.rpc.types.RPCException;
 import cn.niven.rpc.types.RequestVO;

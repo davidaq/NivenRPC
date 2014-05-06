@@ -22,13 +22,7 @@ public class CachedSocket extends Socket {
 	}
 
 	void connect() {
-		if (socket != null) {
-			if (!socket.isConnected()) {
-				disconnect();
-			}
-		}
 		if (socket == null) {
-			System.out.println("connected");
 			try {
 				socket = new Socket();
 				socket.setKeepAlive(true);
@@ -42,6 +36,7 @@ public class CachedSocket extends Socket {
 				}
 				socket.connect(new InetSocketAddress(InetAddress
 						.getByName(addr[0]), port));
+				System.out.println("connected");
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RPCException(e);
@@ -51,9 +46,10 @@ public class CachedSocket extends Socket {
 
 	void disconnect() {
 		try {
-			if (socket != null && socket.isConnected())
+			if (socket != null && socket.isConnected()) {
 				socket.close();
-			System.out.println("disconnected");
+				System.out.println("disconnected");
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

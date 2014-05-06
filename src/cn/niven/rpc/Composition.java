@@ -1,4 +1,4 @@
-package cn.niven.rpc.server;
+package cn.niven.rpc;
 
 import cn.niven.rpc.server.abstraction.ISerializerFactory;
 import cn.niven.rpc.server.abstraction.IServer;
